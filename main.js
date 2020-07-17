@@ -27,8 +27,11 @@
   * setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
   */
  class Quiz {
+   constructor(quiz) {
+     this.quiz = quiz;
+   }
 
-   static makeQuiz(quiz) {
+   makeQuiz(quiz) {
      const answers = buildAnswers(quiz);
      
      titleElement.textContent = `問題 ${gameState.currentIndex + 1}`;
@@ -56,6 +59,9 @@
       });
     };
   }
+
+  // 「Quiz」クラスのインスタンスを生成
+  const quizInstance = new Quiz();
 
   // 「開始」ボタンをクリックしたらクイズ情報を取得する。
   startButton.addEventListener('click', () => {
@@ -86,7 +92,7 @@
 
     if (gameState.currentIndex < gameState.quizzes.length) {
       const quiz = gameState.quizzes[gameState.currentIndex];
-      Quiz.makeQuiz(quiz);
+      quizInstance.makeQuiz(quiz);
     } else {
       finishQuiz();
     }
