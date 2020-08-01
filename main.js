@@ -17,28 +17,28 @@
       this.quizzes = quizData.results;
     }
 
-    getQuizCategory() {
-      return this.quizzes.category;
+    getQuizCategory(index) {
+      return this.quizzes[index - 1].category;
     }
 
-    getQuizDifficulty() {
-      return this.quizzes.difficulty;
+    getQuizDifficulty(index) {
+      return this.quizzes[index - 1].difficulty;
     }
 
     getNumOfQuiz() {
       return this.quizzes.length;
     }
 
-    getQuizQuestion() {
-      return this.quizzes.question;
+    getQuizQuestion(index) {
+      return this.quizzes[index - 1].question;
     }
 
-    getCorrectAnswer() {
-      return this.quizzes.correct_answer;
+    getCorrectAnswer(index) {
+      return this.quizzes[index - 1].correct_answer;
     }
 
-    getIncorrectAnswers() {
-      return this.quizzes.incorrect_answers;
+    getIncorrectAnswers(index) {
+      return this.quizzes[index - 1].incorrect_answers;
     }
   }
   
@@ -47,7 +47,7 @@
   const questionElement = document.getElementById('question');
   const answersContainer = document.getElementById('answers');
   const startButton = document.getElementById('start-button');
-  const genreElement = document.getElementById('gerne');
+  const genreElement = document.getElementById('genre');
   const difficultyElement = document.getElementById('difficulty');
 
 
@@ -84,10 +84,10 @@
 
     const answers = buildAnswers(quizInstance);
     
-    titleElement.innerHTML = `問題 ${quizInstance.currentIndex + 1}`;
-    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory()}`;
-    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty()}`;
-    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion());
+    titleElement.innerHTML = `問題 ${quizInstance.getNumOfQuiz()}`;
+    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(1)}`;
+    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(1)}`;
+    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(1));
 
     answers.forEach((answer) => {
       const answerElement = document.createElement('li');
@@ -98,7 +98,7 @@
       answerElement.appendChild(buttonElement);
 
       answerElement.addEventListener('click', () => {
-        const correctAnswer = unescapeHTML(quizInstance.correct_answer);
+        const correctAnswer = unescapeHTML(quizInstance.getCorrectAnswer(1));
         if (correctAnswer === answerElement.innerHTML) {
           gameState.numberOfCorrects++;
         }
@@ -148,8 +148,8 @@
   // 正解・不正解の解答をシャッフルする
   const buildAnswers = (quizInstance) => {
     const answers = [
-      quizInstance.getCorrectAnswer(),
-      ...quizInstance.getIncorrectAnswers()
+      quizInstance.getCorrectAnswer(1),
+      ...quizInstance.getIncorrectAnswers(1)
     ];
     return shuffle(answers);
   };
