@@ -84,12 +84,12 @@
 
     const answers = buildAnswers(quizInstance);
     
-    titleElement.innerHTML = `問題 ${quizInstance.getNumOfQuiz()}`;
-    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(1)}`;
-    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(1)}`;
-    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(1));
-
-    answers.forEach((answer) => {
+    
+    answers.forEach((answer, index) => {
+      titleElement.innerHTML = `問題 ${quizInstance.getNumOfQuiz()}`;
+      genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(index + 1)}`;
+      difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(index + 1)}`;
+      questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(index + 1));
       const answerElement = document.createElement('li');
       answersContainer.appendChild(answerElement);
 
@@ -98,7 +98,7 @@
       answerElement.appendChild(buttonElement);
 
       answerElement.addEventListener('click', () => {
-        const correctAnswer = unescapeHTML(quizInstance.getCorrectAnswer(1));
+        const correctAnswer = unescapeHTML(quizInstance.getCorrectAnswer(index + 1));
         if (correctAnswer === answerElement.innerHTML) {
           gameState.numberOfCorrects++;
         }
