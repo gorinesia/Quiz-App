@@ -59,7 +59,7 @@
 
   // Webページ上の表示をリセットする
   // fetch APIを使い、API経由でデータを取得する
-  const fetchQuizData = async () => {
+  const fetchQuizData = async (index) => {
     titleElement.textContent = '取得中';
     questionElement.textContent = '少々お待ち下さい';
 
@@ -71,7 +71,7 @@
     gameState.currentIndex = 0;
     gameState.numberOfCorrects = 0;
     
-    setNextQuiz(quizInstance);
+    setNextQuiz(quizInstance, index);
   };
 
   /*
@@ -80,9 +80,9 @@
    回答する度に問題数プロパティもインクリメントする
    setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
    */
-  const makeQuiz = (quizInstance) => {
+  const makeQuiz = (quizInstance, index) => {
 
-    const answers = buildAnswers(quizInstance);
+    const answers = buildAnswers(quizInstance, index);
     
     
     answers.forEach((answer, index) => {
@@ -104,18 +104,18 @@
         }
 
         gameState.currentIndex++;
-        setNextQuiz(quizInstance);
+        setNextQuiz(quizInstance, index);
       });
     });
   }
 
   // 表示要素をリセットする
   // 条件に応じて、次の問題の表示 or 結果を表示する
-  const setNextQuiz = (quizInstance) => {
+  const setNextQuiz = (quizInstance, index) => {
     removeAllAnswers();
 
     if (gameState.currentIndex < gameState.quizzes.length) {
-      makeQuiz(quizInstance);
+      makeQuiz(quizInstance, index);
     } else {
       finishQuiz();
     }
@@ -146,10 +146,10 @@
   
   // quizオブジェクトの中にあるcorrect_answer, incorrect_answersを結合して
   // 正解・不正解の解答をシャッフルする
-  const buildAnswers = (quizInstance) => {
+  const buildAnswers = (quizInstance, index) => {
     const answers = [
-      quizInstance.getCorrectAnswer(1),
-      ...quizInstance.getIncorrectAnswers(1)
+      quizInstance.getCorrectAnswer(index + 1),
+      ...quizInstance.getIncorrectAnswers(index + 1)
     ];
     return shuffle(answers);
   };
