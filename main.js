@@ -4,41 +4,48 @@
   // 利用するAPI
   const API_URL = 'https://opentdb.com/api.php?amount=10&type=multiple';
 
-  // クイズアプリのデータ管理用オブジェクト
-  const gameState = {
-    quizzes: [],
-    currentIndex: 0,
-    numberOfCorrects: 0
-  };
 
-
+  // 「Quiz」クラスを生成し、クイズに関する情報を保持する
   class Quiz {
     constructor(quizData) {
-      this.quizzes = quizData.results;
+      this._quizzes = quizData.results;
+      this._correctAnswersNum = 0;
+
     }
 
     getQuizCategory(index) {
-      return this.quizzes[index - 1].category;
+      return this._quizzes[index - 1].category;
     }
 
     getQuizDifficulty(index) {
-      return this.quizzes[index - 1].difficulty;
+      return this._quizzes[index - 1].difficulty;
     }
 
     getNumOfQuiz() {
-      return this.quizzes.length;
+      return this._quizzes.length;
     }
 
     getQuizQuestion(index) {
-      return this.quizzes[index - 1].question;
+      return this._quizzes[index - 1].question;
     }
 
     getCorrectAnswer(index) {
-      return this.quizzes[index - 1].correct_answer;
+      return this._quizzes[index - 1].correct_answer;
     }
 
     getIncorrectAnswers(index) {
-      return this.quizzes[index - 1].incorrect_answers;
+      return this._quizzes[index - 1].incorrect_answers;
+    }
+
+    countCorrectAnswersNum(index, answer) {
+      const correctAnswer = this._quizzes[index - 1].correct_answer;
+      if (answer === correctAnswer) {
+        return this._correctAnswersNum++;
+      }
+    }
+
+    getCorrectAnswersNum() {
+      return this._correctAnswersNum;
     }
   }
   
@@ -54,7 +61,7 @@
   // 「開始」ボタンをクリックしたらクイズ情報を取得する
   startButton.addEventListener('click', () => {
     startButton.hidden = true;
-    fetchQuizData();
+    fetchQuizData(1);
   });
 
   // Webページ上の表示をリセットする
@@ -67,10 +74,6 @@
     const quizData = await response.json();
     const quizInstance = new Quiz(quizData);
     
-    gameState.quizzes = quizData.results;
-    gameState.currentIndex = 0;
-    gameState.numberOfCorrects = 0;
-    
     setNextQuiz(quizInstance, index);
   };
 
@@ -81,15 +84,16 @@
    setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
    */
   const makeQuiz = (quizInstance, index) => {
-
     const answers = buildAnswers(quizInstance, index);
     
+    let number = index;
+
+    titleElement.innerHTML = `問題 ${number}`;
+    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(number)}`;
+    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(number)}`;
+    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(number));
     
     answers.forEach((answer, index) => {
-      titleElement.innerHTML = `問題 ${quizInstance.getNumOfQuiz()}`;
-      genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(index + 1)}`;
-      difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(index + 1)}`;
-      questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(index + 1));
       const answerElement = document.createElement('li');
       answersContainer.appendChild(answerElement);
 
@@ -98,33 +102,31 @@
       answerElement.appendChild(buttonElement);
 
       answerElement.addEventListener('click', () => {
-        const correctAnswer = unescapeHTML(quizInstance.getCorrectAnswer(index + 1));
-        if (correctAnswer === answerElement.innerHTML) {
-          gameState.numberOfCorrects++;
-        }
+        quizInstance.countCorrectAnswersNum(number, answer);
 
-        gameState.currentIndex++;
-        setNextQuiz(quizInstance, index);
+        number++;
+
+        setNextQuiz(quizInstance, number);
       });
     });
   }
 
   // 表示要素をリセットする
   // 条件に応じて、次の問題の表示 or 結果を表示する
-  const setNextQuiz = (quizInstance, index) => {
+  const setNextQuiz = (quizInstance, number) => {
     removeAllAnswers();
 
-    if (gameState.currentIndex < gameState.quizzes.length) {
-      makeQuiz(quizInstance, index);
+    if (number <= quizInstance.getNumOfQuiz()) {
+      makeQuiz(quizInstance, number);
     } else {
-      finishQuiz();
+      finishQuiz(quizInstance);
     }
   };
 
   // クイズを解いた結果を表示する
   // 「ホームに戻る」ボタンを表示する
-  const finishQuiz = () => {
-    titleElement.textContent = `あなたの正答数は${gameState.numberOfCorrects}です`
+  const finishQuiz = (quizInstance) => {
+    titleElement.textContent = `あなたの正答数は${quizInstance.getCorrectAnswersNum()}です`
     genreElement.textContent = '';
     difficultyElement.textContent = '';
     questionElement.textContent = '再チャレンジしたい場合は下をクリック';
@@ -148,8 +150,8 @@
   // 正解・不正解の解答をシャッフルする
   const buildAnswers = (quizInstance, index) => {
     const answers = [
-      quizInstance.getCorrectAnswer(index + 1),
-      ...quizInstance.getIncorrectAnswers(index + 1)
+      quizInstance.getCorrectAnswer(index),
+      ...quizInstance.getIncorrectAnswers(index)
     ];
     return shuffle(answers);
   };
