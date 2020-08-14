@@ -10,7 +10,6 @@
     constructor(quizData) {
       this._quizzes = quizData.results;
       this._correctAnswersNum = 0;
-
     }
 
     getQuizCategory(index) {
@@ -86,14 +85,12 @@
   const makeQuiz = (quizInstance, index) => {
     const answers = buildAnswers(quizInstance, index);
     
-    let number = index;
-
-    titleElement.innerHTML = `問題 ${number}`;
-    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(number)}`;
-    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(number)}`;
-    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(number));
+    titleElement.innerHTML = `問題 ${index}`;
+    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(index)}`;
+    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(index)}`;
+    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(index));
     
-    answers.forEach((answer, index) => {
+    answers.forEach((answer) => {
       const answerElement = document.createElement('li');
       answersContainer.appendChild(answerElement);
 
@@ -102,22 +99,22 @@
       answerElement.appendChild(buttonElement);
 
       answerElement.addEventListener('click', () => {
-        quizInstance.countCorrectAnswersNum(number, answer);
+        quizInstance.countCorrectAnswersNum(index, answer);
 
-        number++;
+        index++;
 
-        setNextQuiz(quizInstance, number);
+        setNextQuiz(quizInstance, index);
       });
     });
   }
 
   // 表示要素をリセットする
   // 条件に応じて、次の問題の表示 or 結果を表示する
-  const setNextQuiz = (quizInstance, number) => {
+  const setNextQuiz = (quizInstance, index) => {
     removeAllAnswers();
 
-    if (number <= quizInstance.getNumOfQuiz()) {
-      makeQuiz(quizInstance, number);
+    if (index <= quizInstance.getNumOfQuiz()) {
+      makeQuiz(quizInstance, index);
     } else {
       finishQuiz(quizInstance);
     }
