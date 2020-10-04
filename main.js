@@ -4,48 +4,12 @@
   // 利用するAPI
   const API_URL = 'https://opentdb.com/api.php?amount=10&type=multiple';
 
-
-  // 「Quiz」クラスを生成し、クイズに関する情報を保持する
-  class Quiz {
-    constructor(quizData) {
-      this._quizzes = quizData.results;
-      this._correctAnswersNum = 0;
-    }
-
-    getQuizCategory(index) {
-      return this._quizzes[index - 1].category;
-    }
-
-    getQuizDifficulty(index) {
-      return this._quizzes[index - 1].difficulty;
-    }
-
-    getNumOfQuiz() {
-      return this._quizzes.length;
-    }
-
-    getQuizQuestion(index) {
-      return this._quizzes[index - 1].question;
-    }
-
-    getCorrectAnswer(index) {
-      return this._quizzes[index - 1].correct_answer;
-    }
-
-    getIncorrectAnswers(index) {
-      return this._quizzes[index - 1].incorrect_answers;
-    }
-
-    countCorrectAnswersNum(index, answer) {
-      const correctAnswer = this._quizzes[index - 1].correct_answer;
-      if (answer === correctAnswer) {
-        return this._correctAnswersNum++;
-      }
-    }
-
-    getCorrectAnswersNum() {
-      return this._correctAnswersNum;
-    }
+  // 「gameState」オブジェクトを作る
+  // - クイズアプリのデータ管理用オブジェクト
+  const gameState = {
+    quizzes: [],
+    currentIndex: 0,
+    numberOfCorrects: 0
   }
   
   // HTMLのid値がセットされているDOMを取得する
@@ -59,71 +23,43 @@
   // 「開始」ボタンをクリックしたらクイズ情報を取得する
   startButton.addEventListener('click', () => {
     startButton.hidden = true;
-    fetchQuizData(1);
+    fetchQuizData();
   });
 
   // Webページ上の表示をリセットする
   // fetch APIを使い、API経由でデータを取得する
-  const fetchQuizData = async (index) => {
+  const fetchQuizData = async () => {
     titleElement.textContent = '取得中';
     questionElement.textContent = '少々お待ち下さい';
 
     const response = await fetch(API_URL);
-    const quizData = await response.json();
-    const quizInstance = new Quiz(quizData);
+    const data = await response.json();
+
+    gameState.quizzes = data.results;
+    gameState.currentIndex = 0;
+    gameState.numberOfCorrects = 0;
     
-    setNextQuiz(quizInstance, index);
+    setNextQuiz();
   };
 
-  /*
-   クイズデータを元にWebページ上に問題と解答リストを表示する
-   解答をクリックし、正解であれば正答数をインクリメントする
-   回答する度に問題数プロパティもインクリメントする
-   setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
-   */
-  const makeQuiz = (quizInstance, index) => {
-    const answers = buildAnswers(quizInstance, index);
-    
-    titleElement.innerHTML = `問題 ${index}`;
-    genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(index)}`;
-    difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(index)}`;
-    questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(index));
-    
-    answers.forEach((answer) => {
-      const answerElement = document.createElement('li');
-      answersContainer.appendChild(answerElement);
-
-      const buttonElement = document.createElement('button');
-      buttonElement.innerHTML = unescapeHTML(answer);
-      answerElement.appendChild(buttonElement);
-
-      answerElement.addEventListener('click', () => {
-        quizInstance.countCorrectAnswersNum(index, answer);
-
-        index++;
-
-        setNextQuiz(quizInstance, index);
-      });
-    });
-  }
 
   // 表示要素をリセットする
   // 条件に応じて、次の問題の表示 or 結果を表示する
-  const setNextQuiz = (quizInstance, index) => {
+  const setNextQuiz = () => {
     removeAllAnswers();
 
     if (gameState.currentIndex < gameState.quizzes.length) {
       const quiz = gameState.quizzes[gameState.currentIndex];
       makeQuiz(quiz);
     } else {
-      finishQuiz(quizInstance);
+      finishQuiz();
     }
   };
 
   // クイズを解いた結果を表示する
   // 「ホームに戻る」ボタンを表示する
-  const finishQuiz = (quizInstance) => {
-    titleElement.textContent = `あなたの正答数は${quizInstance.getCorrectAnswersNum()}です`
+  const finishQuiz = () => {
+    titleElement.textContent = `あなたの正答数は${gameState.numberOfCorrects}です`
     genreElement.textContent = '';
     difficultyElement.textContent = '';
     questionElement.textContent = '再チャレンジしたい場合は下をクリック';
@@ -183,8 +119,8 @@
   */
   const buildAnswers = (quiz) => {
     const answers = [
-      quizInstance.getCorrectAnswer(index),
-      ...quizInstance.getIncorrectAnswers(index)
+      quiz.correct_answer,
+      ...quiz.incorrect_answers
     ];
     return shuffle(answers);
   };
