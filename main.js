@@ -56,7 +56,6 @@
   const genreElement = document.getElementById('genre');
   const difficultyElement = document.getElementById('difficulty');
 
-
   // 「開始」ボタンをクリックしたらクイズ情報を取得する
   startButton.addEventListener('click', () => {
     startButton.hidden = true;
@@ -113,8 +112,9 @@
   const setNextQuiz = (quizInstance, index) => {
     removeAllAnswers();
 
-    if (index <= quizInstance.getNumOfQuiz()) {
-      makeQuiz(quizInstance, index);
+    if (gameState.currentIndex < gameState.quizzes.length) {
+      const quiz = gameState.quizzes[gameState.currentIndex];
+      makeQuiz(quiz);
     } else {
       finishQuiz(quizInstance);
     }
@@ -142,10 +142,41 @@
       answersContainer.removeChild(answersContainer.firstChild);
     }
   };
-  
-  // quizオブジェクトの中にあるcorrect_answer, incorrect_answersを結合して
-  // 正解・不正解の解答をシャッフルする
-  const buildAnswers = (quizInstance, index) => {
+
+  // クイズデータを元にWebページ上に問題と解答リストを表示する
+  const makeQuiz = (quiz) => {
+    const answers = buildAnswers(quiz);
+    
+    titleElement.textContent = `問題 ${gameState.currentIndex + 1}`;
+    genreElement.textContent = `【ジャンル】 ${quiz.category}`;
+    difficultyElement.textContent = `【難易度】 ${quiz.difficulty}`;
+    questionElement.textContent = unescapeHTML(quiz.question);
+    
+    answers.forEach((answer) => {
+      const answerElement = document.createElement('li');
+      answersContainer.appendChild(answerElement);
+      
+      const buttonElement = document.createElement('button');
+      buttonElement.textContent = unescapeHTML(answer);
+      answerElement.appendChild(buttonElement);
+      
+      answerElement.addEventListener('click', () => {
+        const correctAnswer = unescapeHTML(quiz.correct_answer);
+        if (correctAnswer === answerElement.textContent) {
+          gameState.numberOfCorrects++;
+        }
+        
+        gameState.currentIndex++;
+        setNextQuiz();
+      });
+    });
+  };
+
+  /*
+   quizオブジェクトの中にあるcorrect_answer, incorrect_answersを結合して、
+   正解・不正解の解答をシャッフルする。
+  */
+  const buildAnswers = (quiz) => {
     const answers = [
       quizInstance.getCorrectAnswer(index),
       ...quizInstance.getIncorrectAnswers(index)
