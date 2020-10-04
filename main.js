@@ -19,50 +19,6 @@
   const genreElement = document.getElementById('genre');
   const difficultyElement = document.getElementById('difficulty');
 
-  /**
-  * 「Quiz」クラスを作成する
-  * クイズデータを元にWebページ上に問題と解答リストを表示する。
-  * 解答をクリックし、正解であれば正答数をインクリメントする。
-  * 回答する度に問題数もインクリメントする。
-  * setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
-  */
- class Quiz {
-   constructor(quiz) {
-     this.quiz = quiz;
-   }
-
-   makeQuiz(quiz) {
-     const answers = buildAnswers(quiz);
-     
-     titleElement.textContent = `問題 ${gameState.currentIndex + 1}`;
-     genreElement.textContent = `【ジャンル】 ${quiz.category}`;
-     difficultyElement.textContent = `【難易度】 ${quiz.difficulty}`;
-     questionElement.textContent = unescapeHTML(quiz.question);
-     
-     answers.forEach((answer) => {
-       const answerElement = document.createElement('li');
-       answersContainer.appendChild(answerElement);
-       
-       const buttonElement = document.createElement('button');
-       buttonElement.textContent = unescapeHTML(answer);
-       answerElement.appendChild(buttonElement);
-       
-       answerElement.addEventListener('click', () => {
-         const correctAnswer = unescapeHTML(quiz.correct_answer);
-         if (correctAnswer === answerElement.textContent) {
-           gameState.numberOfCorrects++;
-          }
-          
-          gameState.currentIndex++;
-          setNextQuiz();
-        });
-      });
-    };
-  }
-
-  // 「Quiz」クラスのインスタンスを生成
-  const quizInstance = new Quiz();
-
   // 「開始」ボタンをクリックしたらクイズ情報を取得する。
   startButton.addEventListener('click', () => {
     startButton.hidden = true;
@@ -92,7 +48,7 @@
 
     if (gameState.currentIndex < gameState.quizzes.length) {
       const quiz = gameState.quizzes[gameState.currentIndex];
-      quizInstance.makeQuiz(quiz);
+      makeQuiz(quiz);
     } else {
       finishQuiz();
     }
@@ -119,6 +75,35 @@
     while (answersContainer.firstChild) {
       answersContainer.removeChild(answersContainer.firstChild);
     }
+  };
+
+  // クイズデータを元にWebページ上に問題と解答リストを表示する
+  const makeQuiz = (quiz) => {
+    const answers = buildAnswers(quiz);
+    
+    titleElement.textContent = `問題 ${gameState.currentIndex + 1}`;
+    genreElement.textContent = `【ジャンル】 ${quiz.category}`;
+    difficultyElement.textContent = `【難易度】 ${quiz.difficulty}`;
+    questionElement.textContent = unescapeHTML(quiz.question);
+    
+    answers.forEach((answer) => {
+      const answerElement = document.createElement('li');
+      answersContainer.appendChild(answerElement);
+      
+      const buttonElement = document.createElement('button');
+      buttonElement.textContent = unescapeHTML(answer);
+      answerElement.appendChild(buttonElement);
+      
+      answerElement.addEventListener('click', () => {
+        const correctAnswer = unescapeHTML(quiz.correct_answer);
+        if (correctAnswer === answerElement.textContent) {
+          gameState.numberOfCorrects++;
+        }
+        
+        gameState.currentIndex++;
+        setNextQuiz();
+      });
+    });
   };
 
   /*
