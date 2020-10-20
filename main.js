@@ -47,7 +47,7 @@
       return this._correctAnswersNum;
     }
   }
-  
+
   // HTMLのid値がセットされているDOMを取得する
   const titleElement = document.getElementById('title');
   const questionElement = document.getElementById('question');
@@ -72,7 +72,7 @@
     const response = await fetch(API_URL);
     const quizData = await response.json();
     const quizInstance = new Quiz(quizData);
-    
+
     setNextQuiz(quizInstance, index);
   };
 
@@ -81,15 +81,15 @@
    解答をクリックし、正解であれば正答数をインクリメントする
    回答する度に問題数プロパティもインクリメントする
    setNwxtQuiz関数を実行して次の問題をセットする（最後の問題の場合は結果を表示する）。
-   */
+  */
   const makeQuiz = (quizInstance, index) => {
     const answers = buildAnswers(quizInstance, index);
-    
+
     titleElement.innerHTML = `問題 ${index}`;
     genreElement.innerHTML = `【ジャンル】 ${quizInstance.getQuizCategory(index)}`;
     difficultyElement.innerHTML = `【難易度】 ${quizInstance.getQuizDifficulty(index)}`;
     questionElement.innerHTML = unescapeHTML(quizInstance.getQuizQuestion(index));
-    
+
     answers.forEach((answer) => {
       const answerElement = document.createElement('li');
       answersContainer.appendChild(answerElement);
@@ -103,7 +103,7 @@
 
         index++;
 
-        setNextQuiz(quizInstance, index);
+        setNextQuiz(quizInstance, index)
       });
     });
   }
@@ -142,7 +142,7 @@
       answersContainer.removeChild(answersContainer.firstChild);
     }
   };
-  
+
   // quizオブジェクトの中にあるcorrect_answer, incorrect_answersを結合して
   // 正解・不正解の解答をシャッフルする
   const buildAnswers = (quizInstance, index) => {
